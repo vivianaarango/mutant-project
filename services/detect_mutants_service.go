@@ -27,33 +27,39 @@ var validationSchema = gojsonschema.NewStringLoader(`{
 			]
 		}`)
 
+// RequestBody data necessary from request.
 type RequestBody struct {
 	DNA []string `json:"dna"`
 }
 
-// MutantHelperInterface ...
-// Detect ...
+// MutantHelperInterface interface for helpers.MutantHelper
+// Detect this method detect if the human dna given is of mutant or not.
+// ValidateDNA this method check if the human dna given is valid.
 type MutantHelperInterface interface {
 	Detect(dna []string) bool
 	ValidateDNA(dnaRow string) bool
 }
 
-// DetectMutantsHandler ...
+// DetectMutantsHandler arguments necessary for detect mutant service.
 type DetectMutantsHandler struct {
 	mutantHelperInterface MutantHelperInterface
 }
 
-// detectMutantsService init route for each service.
+// detectMutantsService service for detect if the human dna given is of mutant or not.
 func (s *Service) detectMutantsService() {
 	s.Router.HandleFunc("/mutant", func(w http.ResponseWriter, r *http.Request) {
+		// init arguments for service.
 		control := DetectMutantsHandler{
 			mutantHelperInterface: &helpers.MutantHelper{},
 		}
+
+		// obtain and validate request body.
 		request, err := control.getRequestBody(*r)
 		if err != nil {
 			w.WriteHeader(http.StatusUnprocessableEntity)
 		}
 
+		// check if the human dna is mutant or not.
 		response := control.mutantHelperInterface.Detect(request.DNA)
 		if !response {
 			w.WriteHeader(http.StatusForbidden)
@@ -63,6 +69,7 @@ func (s *Service) detectMutantsService() {
 	}).Methods(http.MethodPost)
 }
 
+// getRequestBody obtain and validate request body.
 func (h *DetectMutantsHandler) getRequestBody(r http.Request) (RequestBody, error) {
 	var request RequestBody
 

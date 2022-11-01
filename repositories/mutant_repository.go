@@ -1,1 +1,5 @@
 package repositories
+
+func getByID() {
+
+}
