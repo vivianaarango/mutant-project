@@ -5,19 +5,21 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
-// MutantRepository ...
+// MutantRepository struct for mutant repository methods.
 type MutantRepository struct {
 	Client *dynamodb.DynamoDB
 	Table  string
 }
 
-// Save ...
+// Save dna human info.
 func (r *MutantRepository) Save(dna []string, isMutant bool) error {
+	// generate partition key with human dna.
 	pk := ""
 	for i := 0; i < len(dna); i++ {
 		pk = pk + dna[i] + "-"
 	}
 
+	// save data into dynamo db table
 	_, err := r.Client.PutItem(&dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
 			"pk": {
@@ -30,6 +32,7 @@ func (r *MutantRepository) Save(dna []string, isMutant bool) error {
 		TableName: aws.String(r.Table),
 	})
 
+	// check error.
 	if err != nil {
 		return err
 	}
@@ -37,6 +40,7 @@ func (r *MutantRepository) Save(dna []string, isMutant bool) error {
 	return nil
 }
 
+// NewMutantRepository create repository arguments.
 func NewMutantRepository() *MutantRepository {
 	dynamoProvider := DynamoDB{}
 	clientDynamo, err := dynamoProvider.DynamoClient()

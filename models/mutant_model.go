@@ -1,7 +1,7 @@
 package models
 
-// Mutant ...
+// Mutant model for save dna human info.
 type Mutant struct {
-	PK string `json:"pk"`
-	SK string `json:"sk"`
+	PK       string `json:"pk"`
+	IsMutant string `json:"is_mutant"`
 }

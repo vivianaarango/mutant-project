@@ -5,8 +5,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
-type Dynamo struct{}
-
 // DynamoAPI interface for DynamoDB methods.
 type DynamoAPI interface {
 	PutItem(input *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error)
@@ -20,16 +18,12 @@ type DynamoProvider interface {
 	DynamoClient() (DynamoAPI, error)
 }
 
-type Config struct {
-	EndPoint string
-	Region   string
-}
-
+// DynamoDB struct for dynamo client.
 type DynamoDB struct {
 	client *dynamodb.DynamoDB
-	config Config
 }
 
+// DynamoClient create dynamo client.
 func (d *DynamoDB) DynamoClient() (DynamoAPI, error) {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,

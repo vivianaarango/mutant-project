@@ -61,19 +61,21 @@ func (s *Service) detectMutantsService() {
 		// obtain and validate request body.
 		request, err := control.getRequestBody(*r)
 		if err != nil {
+			fmt.Fprintf(w, "Error: %+v", err)
 			w.WriteHeader(http.StatusUnprocessableEntity)
 		}
 
 		// check if the human dna is mutant or not.
 		isMutant := control.mutantHelperInterface.Detect(request.DNA)
 
-		// save
+		// save dna info.
 		err = control.mutantRepositoryInterface.Save(request.DNA, isMutant)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintf(w, "Error: %+v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
+		// response if the human is mutant or not.
 		if !isMutant {
 			w.WriteHeader(http.StatusForbidden)
 		} else {
@@ -87,6 +89,7 @@ func (s *Service) detectMutantsService() {
 func (h *DetectMutantsHandler) getRequestBody(r http.Request) (RequestBody, error) {
 	var request RequestBody
 
+	// obtain data from request.
 	buf := new(strings.Builder)
 	_, err := io.Copy(buf, r.Body)
 
@@ -95,6 +98,7 @@ func (h *DetectMutantsHandler) getRequestBody(r http.Request) (RequestBody, erro
 		return RequestBody{}, err
 	}
 
+	// validate body data.
 	dataToValidate := gojsonschema.NewGoLoader(request)
 	bodyResultValidate, err := gojsonschema.Validate(validationSchema, dataToValidate)
 	if err != nil {
@@ -106,6 +110,7 @@ func (h *DetectMutantsHandler) getRequestBody(r http.Request) (RequestBody, erro
 	}
 
 	for _, item := range request.DNA {
+		// check if the dna obtain from request is valid.
 		if !h.mutantHelperInterface.ValidateDNA(item) {
 			return RequestBody{}, errors.New("adn paili")
 		}
