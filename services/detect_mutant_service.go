@@ -59,6 +59,7 @@ func (s *Service) detectMutantsService() {
 		if err != nil {
 			fmt.Fprintf(w, "Error: %+v", err)
 			w.WriteHeader(http.StatusUnprocessableEntity)
+			return
 		}
 
 		// check if the human dna is mutant or not.
@@ -69,6 +70,7 @@ func (s *Service) detectMutantsService() {
 		if err != nil {
 			fmt.Fprintf(w, "Error: %+v", err)
 			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 
 		// response if the human is mutant or not.
@@ -102,13 +104,13 @@ func (h *DetectMutantsHandler) getRequestBody(r http.Request) (RequestBody, erro
 	}
 
 	if !bodyResultValidate.Valid() {
-		return RequestBody{}, errors.New("")
+		return RequestBody{}, errors.New("Request body is not valid.")
 	}
 
 	for _, item := range request.DNA {
 		// check if the dna obtain from request is valid.
 		if !h.mutantHelperInterface.ValidateDNA(item) {
-			return RequestBody{}, errors.New("adn paili")
+			return RequestBody{}, errors.New("Human DNA is not valid.")
 		}
 	}
 

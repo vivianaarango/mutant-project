@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -11,7 +12,7 @@ type MutantHelper struct{}
 // This only contains nitrogenous base of dna (A,T,C,G).
 // A human is mutant if exist more than one sequence of four letters equal, obliquely,
 // horizontally or vertically that are not repeated.
-func (h *MutantHelper) Detect(dna []string) bool {
+func (mh *MutantHelper) Detect(dna []string) bool {
 	// we create a matrix to storage each nitrogenous base of dna.
 	mutantDNA := make([][]string, len(dna))
 
@@ -27,22 +28,17 @@ func (h *MutantHelper) Detect(dna []string) bool {
 			// storage the value in upper case to validate coincidences.
 			mutantDNA[i][j] = strings.ToUpper(separatedDNA[j])
 		}
+
+		fmt.Println(mutantDNA[i])
 	}
 
-	if horizontal(mutantDNA) > 1 || vertical(mutantDNA) > 1 {
-		return false
-	}
-
-	if horizontal(mutantDNA) == 1 || vertical(mutantDNA) == 1 {
-		return true
-	}
-
-	return false
+	v, h, tr, tl := searchMutant(mutantDNA)
+	return isMutant(v, h, tr, tl)
 }
 
 // ValidateDNA this method check if the human dna given is valid
 // for evaluated if this is mutant.
-func (h *MutantHelper) ValidateDNA(dnaRow string) bool {
+func (mh *MutantHelper) ValidateDNA(dnaRow string) bool {
 	// separate dna for chars.
 	separatedDNA := strings.Split(dnaRow, "")
 
@@ -58,72 +54,67 @@ func (h *MutantHelper) ValidateDNA(dnaRow string) bool {
 	return true
 }
 
-// horizontal check the number of sequence of four letters equals horizontally
-// that exist in the dna given.
-func horizontal(mutantADN [][]string) int {
-	// count for number of sequences found.
-	countValid := 0
-	for r := 0; r < len(mutantADN); r++ {
-		// init coincidences number.
-		coincidences := 1
-		// value to compare values.
-		currentValue := ""
-
-		for c := 0; c < len(mutantADN[r])-1; c++ {
-			// set value to compare.
-			if currentValue == "" {
-				currentValue = mutantADN[r][c]
-			}
-
-			// validate if the letters are equals.
-			if currentValue == mutantADN[r][c+1] {
-				coincidences++
-			} else {
-				currentValue = ""
-			}
-
-			// check if the sequence has four letters and adds to count.
-			if coincidences == 4 {
-				countValid++
-				coincidences = 1
-			}
-		}
+func ones(size int) []int {
+	onesSlice := make([]int, size)
+	for i := 0; i < len(onesSlice); i++ {
+		onesSlice[i] = 1
 	}
-
-	return countValid
+	return onesSlice
 }
 
-// vertical check the number of sequence of four letters equals vertically
-// that exist in the dna given.
-func vertical(mutantADN [][]string) int {
-	// count for number of sequences found.
-	countValid := 0
-	for i := 0; i < len(mutantADN); i++ {
-		// init coincidences number.
-		coincidences := 1
-		// value to compare values.
-		currentValue := ""
+func searchMutant(a [][]string) ([]int, []int, []int, []int) {
+	v := ones(len(a))
+	h := ones(len(a))
+	tr := ones(len(a)*2 - 1)
+	tl := ones(len(a)*2 - 1)
 
-		for j := 0; j < len(mutantADN)-1; j++ {
-			// set value to compare.
-			if currentValue == "" {
-				currentValue = mutantADN[j][i]
+	for i := range a {
+		for j := range a[i] {
+
+			// VERTICAL
+			if i > 0 {
+				if a[i][j] == a[i-1][j] {
+					v[j]++
+				}
 			}
 
-			// validate if the letters are equals.
-			if currentValue == mutantADN[j+1][i] {
-				coincidences++
-			} else {
-				currentValue = ""
+			// TOP RIGHT
+			if j < len(a)-1 && i > 0 {
+				if a[i][j] == a[i-1][j+1] {
+					tr[i+j]++
+				}
 			}
 
-			// check if the sequence has four letters and adds to count.
-			if coincidences == 4 {
-				countValid++
-				coincidences = 1
+			// HORIZONTAL
+			if j > 0 {
+				if a[i][j] == a[i][j-1] {
+					h[i]++
+				}
+			}
+
+			// TOP LEFT
+			if j > 0 && i > 0 {
+				if a[i][j] == a[i-1][j-1] {
+					_j := len(a) - j - 1
+					tl[_j+i]++
+				}
 			}
 		}
 	}
 
-	return countValid
+	return v, h, tr, tl
+}
+
+func isMutant(v []int, h []int, tr []int, tl []int) bool {
+	is := false
+	all := append(v, h...)
+	all = append(all, tr...)
+	all = append(all, tl...)
+
+	for _, l := range all {
+		if l == 4 {
+			is = true
+		}
+	}
+	return is
 }
