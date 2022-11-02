@@ -3,7 +3,7 @@ package services
 import (
 	"encoding/json"
 	"errors"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"fmt"
 	"github.com/xeipuuv/gojsonschema"
 	"io"
 	"mutant-project/helpers"
@@ -64,6 +64,13 @@ func (s *Service) detectMutantsService() {
 			w.WriteHeader(http.StatusUnprocessableEntity)
 		}
 
+		// save
+		err = control.mutantRepositoryInterface.Save(request.DNA)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
 		// check if the human dna is mutant or not.
 		response := control.mutantHelperInterface.Detect(request.DNA)
 		if !response {
@@ -107,19 +114,8 @@ func (h *DetectMutantsHandler) getRequestBody(r http.Request) (RequestBody, erro
 
 // initialize arguments for detect mutant service.
 func initialize() *DetectMutantsHandler {
-	dynamoProvider := repositories.DynamoDB{}
-	clientDynamo, err := dynamoProvider.DynamoClient()
-	if err != nil {
-		panic("dynamo client error")
-	}
-
-	mutantRepository := &repositories.MutantRepository{
-		Client: clientDynamo.(*dynamodb.DynamoDB),
-		Table:  "mutants",
-	}
-
 	return &DetectMutantsHandler{
 		mutantHelperInterface:     &helpers.MutantHelper{},
-		mutantRepositoryInterface: mutantRepository,
+		mutantRepositoryInterface: repositories.NewMutantRepository(),
 	}
 }
