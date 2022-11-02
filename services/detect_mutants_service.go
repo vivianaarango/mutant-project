@@ -3,9 +3,11 @@ package services
 import (
 	"encoding/json"
 	"errors"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/xeipuuv/gojsonschema"
 	"io"
 	"mutant-project/helpers"
+	"mutant-project/repositories"
 	"net/http"
 	"strings"
 )
@@ -40,18 +42,21 @@ type MutantHelperInterface interface {
 	ValidateDNA(dnaRow string) bool
 }
 
+type MutantRepositoryInterface interface {
+	Save(dna []string) error
+}
+
 // DetectMutantsHandler arguments necessary for detect mutant service.
 type DetectMutantsHandler struct {
-	mutantHelperInterface MutantHelperInterface
+	mutantHelperInterface     MutantHelperInterface
+	mutantRepositoryInterface MutantRepositoryInterface
 }
 
 // detectMutantsService service for detect if the human dna given is of mutant or not.
 func (s *Service) detectMutantsService() {
 	s.Router.HandleFunc("/mutant", func(w http.ResponseWriter, r *http.Request) {
 		// init arguments for service.
-		control := DetectMutantsHandler{
-			mutantHelperInterface: &helpers.MutantHelper{},
-		}
+		control := initialize()
 
 		// obtain and validate request body.
 		request, err := control.getRequestBody(*r)
@@ -98,4 +103,23 @@ func (h *DetectMutantsHandler) getRequestBody(r http.Request) (RequestBody, erro
 	}
 
 	return request, nil
+}
+
+// initialize arguments for detect mutant service.
+func initialize() *DetectMutantsHandler {
+	dynamoProvider := repositories.DynamoDB{}
+	clientDynamo, err := dynamoProvider.DynamoClient()
+	if err != nil {
+		panic("dynamo client error")
+	}
+
+	mutantRepository := &repositories.MutantRepository{
+		Client: clientDynamo.(*dynamodb.DynamoDB),
+		Table:  "mutants",
+	}
+
+	return &DetectMutantsHandler{
+		mutantHelperInterface:     &helpers.MutantHelper{},
+		mutantRepositoryInterface: mutantRepository,
+	}
 }

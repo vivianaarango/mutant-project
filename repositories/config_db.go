@@ -1,32 +1,38 @@
 package repositories
 
-//type Dynamo struct{}
+import (
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+)
+
+type Dynamo struct{}
 
 // DynamoAPI interface for DynamoDB methods.
-/*type DynamoAPI interface {
+type DynamoAPI interface {
 	PutItem(input *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error)
 	Query(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error)
 	UpdateItem(input *dynamodb.UpdateItemInput) (*dynamodb.UpdateItemOutput, error)
 	TransactWriteItems(input *dynamodb.TransactWriteItemsInput) (*dynamodb.TransactWriteItemsOutput, error)
-}*/
+}
 
-/*func (d *Dynamo) DynamoClient() *dynamodb.DynamoDB {
+func (d *Dynamo) DynamoClient() *dynamodb.DynamoDB {
 	config := &aws.Config{
-		Region:   aws.String("us-west-2"),
-		Endpoint: aws.String("http://localhost:8000"),
+		Region:   aws.String("us-east-1"),
+		Endpoint: aws.String("com.amazonaws.us-east-1.dynamodb\t"),
 	}
 
 	sess := session.Must(session.NewSession(config))
 
 	return dynamodb.New(sess)
-}*/
+}
 
 // DynamoProvider interface for Dynamo client.
-/*type DynamoProvider interface {
+type DynamoProvider interface {
 	DynamoClient() (DynamoAPI, error)
-}*/
+}
 
-/*type Config struct {
+type Config struct {
 	EndPoint string
 	Region   string
 }
@@ -52,10 +58,3 @@ func (d *DynamoDB) DynamoClient() (DynamoAPI, error) {
 	d.client = dynamodb.New(sess)
 	return d.client, nil
 }
-*/
-// NewDynamoProvider instantiate new NewDynamoProvider.
-/*func NewDynamoProvider(config Config) DynamoProvider {
-	return &DynamoDB{
-		config: config,
-	}
-}*/
