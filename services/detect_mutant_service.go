@@ -42,21 +42,17 @@ type MutantHelperInterface interface {
 	ValidateDNA(dnaRow string) bool
 }
 
-type MutantRepositoryInterface interface {
-	Save(dna []string, isMutant bool) error
-}
-
 // DetectMutantsHandler arguments necessary for detect mutant service.
 type DetectMutantsHandler struct {
 	mutantHelperInterface     MutantHelperInterface
-	mutantRepositoryInterface MutantRepositoryInterface
+	mutantRepositoryInterface repositories.MutantRepositoryInterface
 }
 
 // detectMutantsService service for detect if the human dna given is of mutant or not.
 func (s *Service) detectMutantsService() {
 	s.Router.HandleFunc("/mutant", func(w http.ResponseWriter, r *http.Request) {
 		// init arguments for service.
-		control := initialize()
+		control := initializeDetectMutantService()
 
 		// obtain and validate request body.
 		request, err := control.getRequestBody(*r)
@@ -120,7 +116,7 @@ func (h *DetectMutantsHandler) getRequestBody(r http.Request) (RequestBody, erro
 }
 
 // initialize arguments for detect mutant service.
-func initialize() *DetectMutantsHandler {
+func initializeDetectMutantService() *DetectMutantsHandler {
 	return &DetectMutantsHandler{
 		mutantHelperInterface:     &helpers.MutantHelper{},
 		mutantRepositoryInterface: repositories.NewMutantRepository(),
