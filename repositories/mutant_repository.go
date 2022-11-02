@@ -7,18 +7,24 @@ import (
 	"mutant-project/models"
 )
 
+// table with the human data.
+const tableName string = "humans_dna"
+
 // MutantRepository struct for mutant repository methods.
 type MutantRepository struct {
 	Client *dynamodb.DynamoDB
 	Table  string
 }
 
+// MutantRepositoryInterface interface for repositories.MutantRepository
+// Save human dna info and if this contains dna mutant or not.
+// GetDNAStats obtain the stats of the human validate.
 type MutantRepositoryInterface interface {
 	Save(dna []string, isMutant bool) error
 	GetDNAStats() (totalMutants int, totalHumans int, err error)
 }
 
-// Save dna human info.
+// Save human dna info and if this contains dna mutant or not.
 func (r *MutantRepository) Save(dna []string, isMutant bool) error {
 	// generate partition key with human dna.
 	pk := ""
@@ -47,8 +53,11 @@ func (r *MutantRepository) Save(dna []string, isMutant bool) error {
 	return nil
 }
 
-// GetDNAStats ...
+// GetDNAStats obtain the stats of the human validate.
+// Count total humans validate.
+// Count total humans with dna mutant.
 func (r *MutantRepository) GetDNAStats() (totalMutants int, totalHumans int, err error) {
+	// obtain human data.
 	result, err := r.Client.Scan(&dynamodb.ScanInput{
 		TableName: aws.String(r.Table),
 	})
@@ -57,17 +66,20 @@ func (r *MutantRepository) GetDNAStats() (totalMutants int, totalHumans int, err
 		return
 	}
 
+	// loop data and count total humans and total humans with dna mutant.
 	for _, data := range result.Items {
-		item := models.Mutant{}
+		totalHumans++
+
+		// obtain data from dynamo result.
+		item := models.HumanDNA{}
 		err = dynamodbattribute.UnmarshalMap(data, &item)
 		if err != nil {
 			return
 		}
 
+		// check if the human has dna mutant.
 		if item.IsMutant {
 			totalMutants++
-		} else {
-			totalHumans++
 		}
 	}
 
@@ -84,6 +96,6 @@ func NewMutantRepository() *MutantRepository {
 
 	return &MutantRepository{
 		Client: clientDynamo.(*dynamodb.DynamoDB),
-		Table:  "mutants",
+		Table:  tableName,
 	}
 }

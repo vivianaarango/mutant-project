@@ -18,6 +18,9 @@ func (s *Service) Initialize() {
 
 	// initialize detect mutant service.
 	s.detectMutantsService()
+
+	// initialize mutant stats service.
+	s.mutantStatsService()
 }
 
 // Run the app on it's router
