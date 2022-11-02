@@ -32,8 +32,8 @@ func (mh *MutantHelper) Detect(dna []string) bool {
 		fmt.Println(mutantDNA[i])
 	}
 
-	v, h, tr, tl := searchMutant(mutantDNA)
-	return isMutant(v, h, tr, tl)
+	v, h, t := searchMutant(mutantDNA)
+	return isMutant(v, h, t)
 }
 
 // ValidateDNA this method check if the human dna given is valid
@@ -54,15 +54,15 @@ func (mh *MutantHelper) ValidateDNA(dnaRow string) bool {
 	return true
 }
 
-func ones(size int) []int {
-	onesSlice := make([]int, size)
-	for i := 0; i < len(onesSlice); i++ {
-		onesSlice[i] = 1
+func searchMutant(a [][]string) ([]int, []int, []int) {
+	var ones = func(size int) []int {
+		onesSlice := make([]int, size)
+		for i := 0; i < len(onesSlice); i++ {
+			onesSlice[i] = 1
+		}
+		return onesSlice
 	}
-	return onesSlice
-}
 
-func searchMutant(a [][]string) ([]int, []int, []int, []int) {
 	v := ones(len(a))
 	h := ones(len(a))
 	tr := ones(len(a)*2 - 1)
@@ -102,14 +102,13 @@ func searchMutant(a [][]string) ([]int, []int, []int, []int) {
 		}
 	}
 
-	return v, h, tr, tl
+	return v, h, append(tr, tl...)
 }
 
-func isMutant(v []int, h []int, tr []int, tl []int) bool {
+func isMutant(v []int, h []int, t []int) bool {
 	is := false
 	all := append(v, h...)
-	all = append(all, tr...)
-	all = append(all, tl...)
+	all = append(all, t...)
 
 	for _, l := range all {
 		if l == 4 {
