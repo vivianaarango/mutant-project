@@ -43,7 +43,7 @@ type MutantHelperInterface interface {
 }
 
 type MutantRepositoryInterface interface {
-	Save(dna []string) error
+	Save(dna []string, isMutant bool) error
 }
 
 // DetectMutantsHandler arguments necessary for detect mutant service.
@@ -64,20 +64,22 @@ func (s *Service) detectMutantsService() {
 			w.WriteHeader(http.StatusUnprocessableEntity)
 		}
 
+		// check if the human dna is mutant or not.
+		isMutant := control.mutantHelperInterface.Detect(request.DNA)
+
 		// save
-		err = control.mutantRepositoryInterface.Save(request.DNA)
+		err = control.mutantRepositoryInterface.Save(request.DNA, isMutant)
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
-		// check if the human dna is mutant or not.
-		response := control.mutantHelperInterface.Detect(request.DNA)
-		if !response {
+		if !isMutant {
 			w.WriteHeader(http.StatusForbidden)
 		} else {
 			w.WriteHeader(http.StatusOK)
 		}
+
 	}).Methods(http.MethodPost)
 }
 

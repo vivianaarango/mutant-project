@@ -11,15 +11,15 @@ type MutantHelper struct{}
 // This only contains nitrogenous base of dna (A,T,C,G).
 // A human is mutant if exist more than one sequence of four letters equal, obliquely,
 // horizontally or vertically that are not repeated.
-func (h *MutantHelper) Detect(adn []string) bool {
+func (h *MutantHelper) Detect(dna []string) bool {
 	// we create a matrix to storage each nitrogenous base of dna.
-	mutantDNA := make([][]string, len(adn))
+	mutantDNA := make([][]string, len(dna))
 
 	// looping through the slice to declare
 	// slice of slices of length nxn.
-	for i := 0; i < len(adn); i++ {
+	for i := 0; i < len(dna); i++ {
 		// separate chain of dna.
-		separatedDNA := strings.Split(adn[i], "")
+		separatedDNA := strings.Split(dna[i], "")
 		mutantDNA[i] = make([]string, len(separatedDNA))
 
 		// assigning values to each  slice of a slice
