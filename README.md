@@ -51,13 +51,8 @@ Respuesta error inesperado
 
 ```json
 {
-  "dna": [
-    "ATGCGA",
-    "CAGTGC",
-    "TTATGT",
-    "AGAAGG",
-    "CCCCTA",
-    "TCACTG"
-  ]
+  "count_mutant_dna":13,
+  "count_human_dna":30,
+  "ratio":0
 }
 ```
